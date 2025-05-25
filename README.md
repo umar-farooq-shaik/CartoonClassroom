@@ -2,7 +2,8 @@
 
 **CartoonClassroom** is a colorful, comic-based educational platform where students learn through fun stories explained by their favorite cartoon characters.
 
-![banner](https://img.youtube.com/vi/1iNsBNybNOY/0.jpg)
+
+<img src="https://drive.google.com/uc?export=view&id=1jw0Ca6mPwy57wnm8ysAqpo9HG00GXw28" alt="Banner" width="100%" />
 
 👉 [Watch the Full Demo on YouTube](https://youtu.be/1iNsBNybNOY)
 ## 🚀 Features
