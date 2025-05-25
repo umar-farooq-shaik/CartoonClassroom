@@ -227,7 +227,7 @@ class SimpleMemStorage implements IStorage {
 
 export const storage = new SimpleMemStorage();
 
-export class MemStorage implements IStorage {
+class MemStorage implements IStorage {
   private users: Map<number, User>;
   private stories: Map<number, Story>;
   private textbooks: Map<number, Textbook>;
@@ -402,4 +402,5 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Using the SimpleMemStorage for demo mode
+// export const storage = new MemStorage();

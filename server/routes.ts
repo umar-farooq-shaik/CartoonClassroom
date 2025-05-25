@@ -8,22 +8,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User routes
   app.post("/api/users", async (req, res) => {
     try {
-      // Create user data directly for demo mode
-      const userData = {
+      // Create user directly for demo authentication
+      const user = {
+        id: 1,
         externalId: 'demo_user_123',
-        name: req.body.name,
-        age: Number(req.body.age),
-        class: req.body.class,
-        location: req.body.location,
-        favoriteCartoons: Array.isArray(req.body.favoriteCartoons) ? req.body.favoriteCartoons : []
+        name: req.body.name || 'Student',
+        age: parseInt(req.body.age) || 10,
+        class: req.body.class || '5th Grade',
+        location: req.body.location || 'Unknown',
+        favoriteCartoons: req.body.favoriteCartoons || [],
+        createdAt: new Date()
       };
       
-      // Direct creation without schema validation for now
-      const user = await storage.createUser(userData);
       res.json(user);
     } catch (error) {
       console.log('User creation error:', error);
-      res.status(400).json({ error: error instanceof Error ? error.message : "Failed to create user profile" });
+      res.status(400).json({ error: "Failed to create user profile" });
     }
   });
 
