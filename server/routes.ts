@@ -6,6 +6,19 @@ import { insertUserSchema, insertStorySchema, insertTextbookSchema, insertAchiev
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // User registration endpoint
+  app.post("/api/users", async (req, res) => {
+    try {
+      const userData = insertUserSchema.parse(req.body);
+      const user = await storage.createUser(userData);
+      res.json(user);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid user data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create user" });
+    }
+  });
+
   app.post("/api/auth/register", async (req, res) => {
     try {
       const userData = insertUserSchema.parse(req.body);
@@ -76,14 +89,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Story generation endpoint
   app.post("/api/stories/generate", async (req, res) => {
     try {
-      const { topic, subject, userId } = req.body;
+      const { topic, subject, userId, userPreferences } = req.body;
       
       if (!topic || !subject || !userId) {
         return res.status(400).json({ error: "Topic, subject, and userId are required" });
       }
 
-      // Template stories for educational content
-      const templateStories = {
+      // Get user preferences for personalization
+      const user = await storage.getUser(userId);
+      const favoriteCartoons = user?.favoriteCartoons || userPreferences?.favoriteCartoons || ['SpongeBob'];
+      const mainCharacter = favoriteCartoons[0] || 'SpongeBob';
+
+      // Use Gemini AI to generate educational story
+      const { GoogleGenerativeAI } = await import('@google/generative-ai');
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+      const prompt = `Create an educational comic story for children about "${topic}" in the subject of ${subject}. 
+      The main character should be ${mainCharacter}. 
+      
+      Format the response as a JSON object with this structure:
+      {
+        "title": "Story title",
+        "panels": [
+          {
+            "character": "character_name",
+            "characterName": "Character Display Name",
+            "text": "Dialogue and educational content",
+            "background": "Scene description"
+          }
+        ]
+      }
+      
+      Requirements:
+      - Make it fun and educational for kids aged 5-12
+      - Include 4-6 panels
+      - Explain the topic clearly with examples
+      - Use simple language
+      - Make it engaging with the cartoon character
+      - Include interactive elements when possible
+      
+      Topic: ${topic}
+      Subject: ${subject}
+      Character: ${mainCharacter}`;
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      
+      // Parse the AI response
+      let storyData;
+      try {
+        // Extract JSON from response
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          storyData = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error('No JSON found in response');
+        }
+      } catch (parseError) {
+        console.log('AI parsing failed, using template story');
+        // Fallback to template stories if AI parsing fails
+        const templateStories = {
         Math: {
           Addition: {
             title: "SpongeBob's Krabby Patty Math Adventure",
@@ -239,36 +306,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
 
-      // Get story from templates or create a default one
-      const storyData = (templateStories as any)[subject]?.[topic] || {
-        title: `Learning About ${topic}`,
-        panels: [
-          {
-            character: "SpongeBob",
-            characterName: "SpongeBob SquarePants",
-            text: `Hi there! Today we're going to learn about ${topic} in ${subject}. This is going to be so much fun!`,
-            background: "A colorful classroom setting"
-          },
-          {
-            character: "SpongeBob", 
-            characterName: "SpongeBob SquarePants",
-            text: `${topic} is really interesting! Let me explain what makes it special and why it's important to learn about.`,
-            background: "Educational setting with books and learning materials"
-          },
-          {
-            character: "SpongeBob",
-            characterName: "SpongeBob SquarePants", 
-            text: `Here's a fun way to remember ${topic}: think of it like a game where you get to explore and discover new things!`,
-            background: "Fun activity scene with colorful elements"
-          },
-          {
-            character: "SpongeBob",
-            characterName: "SpongeBob SquarePants", 
-            text: `Great job learning about ${topic}! You're doing amazing and I'm so proud of you!`,
-            background: "Celebration scene with confetti and cheers"
-          }
-        ]
-      };
+        // Get story from templates or create a default one
+        storyData = (templateStories as any)[subject]?.[topic] || {
+          title: `Learning About ${topic}`,
+          panels: [
+            {
+              character: mainCharacter.toLowerCase(),
+              characterName: mainCharacter,
+              text: `Hi there! Today we're going to learn about ${topic} in ${subject}. This is going to be so much fun!`,
+              background: "A colorful classroom setting"
+            },
+            {
+              character: mainCharacter.toLowerCase(), 
+              characterName: mainCharacter,
+              text: `${topic} is really interesting! Let me explain what makes it special and why it's important to learn about.`,
+              background: "Educational setting with books and learning materials"
+            },
+            {
+              character: mainCharacter.toLowerCase(),
+              characterName: mainCharacter, 
+              text: `Here's a fun way to remember ${topic}: think of it like a game where you get to explore and discover new things!`,
+              background: "Fun activity scene with colorful elements"
+            },
+            {
+              character: mainCharacter.toLowerCase(),
+              characterName: mainCharacter, 
+              text: `Great job learning about ${topic}! You're doing amazing and I'm so proud of you!`,
+              background: "Celebration scene with confetti and cheers"
+            }
+          ]
+        };
+      }
 
       // Return the generated story
       const storyResponse = {
