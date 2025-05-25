@@ -65,9 +65,9 @@ export const Navigation = () => {
             ) : (
               <div className="flex items-center">
                 <Button 
-                  onClick={() => setLocation('/signup')} 
+                  onClick={signIn} 
                   variant="default" 
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-2 px-6 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-300"
                 >
                   Sign In
                 </Button>

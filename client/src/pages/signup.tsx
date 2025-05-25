@@ -105,14 +105,34 @@ export default function Signup() {
       return;
     }
 
-    createUserMutation.mutate({
-      externalId: user.id,
-      name: formData.name,
-      age: parseInt(formData.age),
-      class: formData.class,
-      location: formData.location,
-      favoriteCartoons: formData.favoriteCartoons,
-    });
+    // If user is not signed in, sign them in first
+    if (!user) {
+      signIn();
+      // Wait for auth to complete before creating profile
+      setTimeout(() => {
+        const storedUser = localStorage.getItem('demo_user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          createUserMutation.mutate({
+            externalId: userData.id,
+            name: formData.name,
+            age: parseInt(formData.age),
+            class: formData.class,
+            location: formData.location,
+            favoriteCartoons: formData.favoriteCartoons,
+          });
+        }
+      }, 100);
+    } else {
+      createUserMutation.mutate({
+        externalId: user.id,
+        name: formData.name,
+        age: parseInt(formData.age),
+        class: formData.class,
+        location: formData.location,
+        favoriteCartoons: formData.favoriteCartoons,
+      });
+    }
   };
 
   return (

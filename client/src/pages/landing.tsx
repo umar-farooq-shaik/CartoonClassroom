@@ -32,17 +32,7 @@ export default function Landing() {
       {/* Floating Background Icons */}
       <FloatingIcons />
       
-      {/* Navigation bar with sign-in button */}
-      <div className="absolute top-0 right-0 p-4 z-20">
-        {!user && (
-          <Button 
-            onClick={handleLogin} 
-            className="bg-white text-purple-600 hover:bg-purple-100 font-bold py-2 px-6 rounded-full shadow-lg"
-          >
-            Sign In
-          </Button>
-        )}
-      </div>
+
 
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16 relative z-10">
