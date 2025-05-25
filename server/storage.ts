@@ -1,6 +1,6 @@
 import { users, stories, textbooks, achievements, userProgress, type User, type InsertUser, type Story, type InsertStory, type Textbook, type InsertTextbook, type Achievement, type InsertAchievement, type UserProgress, type InsertUserProgress } from "@shared/schema";
 import { db } from './db';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 export interface IStorage {
   // User operations
@@ -32,6 +32,123 @@ export interface IStorage {
   createUserProgress(progress: InsertUserProgress): Promise<UserProgress>;
   updateUserProgress(userId: number, updates: Partial<InsertUserProgress>): Promise<UserProgress>;
 }
+
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getUserByExternalId(externalId: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.externalId, externalId)).limit(1);
+    return result[0];
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const result = await db.insert(users).values(insertUser).returning();
+    return result[0];
+  }
+
+  async updateUser(id: number, updates: Partial<InsertUser>): Promise<User> {
+    const result = await db.update(users).set(updates).where(eq(users.id, id)).returning();
+    if (!result[0]) {
+      throw new Error('User not found');
+    }
+    return result[0];
+  }
+
+  async getStory(id: number): Promise<Story | undefined> {
+    const result = await db.select().from(stories).where(eq(stories.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getStoriesByUser(userId: number): Promise<Story[]> {
+    return await db.select().from(stories).where(eq(stories.userId, userId));
+  }
+
+  async getStoriesBySubject(userId: number, subject: string): Promise<Story[]> {
+    return await db.select().from(stories)
+      .where(and(eq(stories.userId, userId), eq(stories.subject, subject)));
+  }
+
+  async createStory(insertStory: InsertStory): Promise<Story> {
+    const result = await db.insert(stories).values(insertStory).returning();
+    return result[0];
+  }
+
+  async updateStory(id: number, updates: Partial<InsertStory>): Promise<Story> {
+    const result = await db.update(stories).set(updates).where(eq(stories.id, id)).returning();
+    if (!result[0]) {
+      throw new Error('Story not found');
+    }
+    return result[0];
+  }
+
+  async getTextbook(id: number): Promise<Textbook | undefined> {
+    const result = await db.select().from(textbooks).where(eq(textbooks.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getTextbooksByUser(userId: number): Promise<Textbook[]> {
+    return await db.select().from(textbooks).where(eq(textbooks.userId, userId));
+  }
+
+  async createTextbook(insertTextbook: InsertTextbook): Promise<Textbook> {
+    const result = await db.insert(textbooks).values(insertTextbook).returning();
+    return result[0];
+  }
+
+  async updateTextbook(id: number, updates: Partial<InsertTextbook>): Promise<Textbook> {
+    const result = await db.update(textbooks).set(updates).where(eq(textbooks.id, id)).returning();
+    if (!result[0]) {
+      throw new Error('Textbook not found');
+    }
+    return result[0];
+  }
+
+  async addStoryToTextbook(textbookId: number, storyId: number): Promise<Textbook> {
+    const textbook = await this.getTextbook(textbookId);
+    if (!textbook) {
+      throw new Error('Textbook not found');
+    }
+    
+    const updatedStoryIds = [...textbook.storyIds, storyId];
+    return await this.updateTextbook(textbookId, { storyIds: updatedStoryIds });
+  }
+
+  async getAchievementsByUser(userId: number): Promise<Achievement[]> {
+    return await db.select().from(achievements).where(eq(achievements.userId, userId));
+  }
+
+  async createAchievement(insertAchievement: InsertAchievement): Promise<Achievement> {
+    const result = await db.insert(achievements).values(insertAchievement).returning();
+    return result[0];
+  }
+
+  async getUserProgress(userId: number): Promise<UserProgress | undefined> {
+    const result = await db.select().from(userProgress).where(eq(userProgress.userId, userId)).limit(1);
+    return result[0];
+  }
+
+  async createUserProgress(insertProgress: InsertUserProgress): Promise<UserProgress> {
+    const result = await db.insert(userProgress).values(insertProgress).returning();
+    return result[0];
+  }
+
+  async updateUserProgress(userId: number, updates: Partial<InsertUserProgress>): Promise<UserProgress> {
+    let existingProgress = await this.getUserProgress(userId);
+    if (!existingProgress) {
+      // Create new progress if it doesn't exist
+      existingProgress = await this.createUserProgress({ userId, ...updates });
+    } else {
+      const result = await db.update(userProgress).set(updates).where(eq(userProgress.userId, userId)).returning();
+      existingProgress = result[0];
+    }
+    return existingProgress;
+  }
+}
+
+export const storage = new DatabaseStorage();
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
