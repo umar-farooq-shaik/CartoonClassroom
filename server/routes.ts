@@ -133,7 +133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use Gemini AI to generate educational story
       const { GoogleGenerativeAI } = await import('@google/generative-ai');
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
       const prompt = `Create an educational comic story for children about "${topic}" in the subject of ${subject}. 
       The main character should be ${mainCharacter}. 

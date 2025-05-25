@@ -26,7 +26,7 @@ function Router() {
       <Route path="/signup" component={Signup} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/learn/:subject" component={TopicInput} />
-      <Route path="/topic-input*" component={TopicInput} />
+      <Route path="/topic-input" component={TopicInput} />
       <Route path="/story/:id" component={Story} />
       <Route path="/history" component={History} />
       <Route path="/achievements" component={Achievements} />
