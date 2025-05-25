@@ -107,9 +107,9 @@ export default function Signup() {
     }
 
     createUserMutation.mutate({
-      firebaseUid: user.uid,
+      externalId: user.uid,
       name: formData.name,
-      age: parseInt(formData.age),
+      age: formData.age,
       class: formData.class,
       location: formData.location,
       favoriteCartoons: formData.favoriteCartoons,
