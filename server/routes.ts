@@ -392,13 +392,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
       }
 
+      // Extract content as a formatted story if available
+      let contentFormatted = storyData.content;
+      
+      // If content is in JSON format, parse it properly
+      if (typeof contentFormatted === 'string' && contentFormatted.trim().startsWith('{')) {
+        try {
+          const contentObj = JSON.parse(contentFormatted);
+          contentFormatted = contentObj.content || contentFormatted;
+        } catch (e) {
+          console.log('Failed to parse content as JSON, using as is');
+        }
+      }
+      
       // Save the generated story to database
       const storyToSave = {
         userId,
         subject,
         topic,
         title: storyData.title,
-        content: JSON.stringify(storyData),
+        content: contentFormatted,
         panels: storyData.panels,
         isLearned: false
       };
