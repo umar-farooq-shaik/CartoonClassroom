@@ -40,14 +40,15 @@ export default function Signup() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/users/firebase'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users/external'] });
       toast({
         title: "Welcome to CartoonClassroom! 🎉",
-        description: "Your profile has been created successfully!",
+        description: "Your profile is ready! Let's start learning!",
       });
       setLocation('/dashboard');
     },
     onError: (error) => {
+      console.error('Profile creation error:', error);
       toast({
         title: "Error",
         description: "Failed to create profile. Please try again.",

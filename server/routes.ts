@@ -9,12 +9,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/users", async (req, res) => {
     try {
       const userData = insertUserSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByExternalId(userData.externalId);
+      if (existingUser) {
+        return res.json(existingUser); // Return existing user instead of error
+      }
+      
       const user = await storage.createUser(userData);
       res.json(user);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: "Invalid user data", details: error.errors });
       }
+      console.error('User creation error:', error);
       res.status(500).json({ error: "Failed to create user" });
     }
   });
