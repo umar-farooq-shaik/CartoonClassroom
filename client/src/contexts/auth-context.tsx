@@ -1,14 +1,11 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User } from 'firebase/auth';
-import { onAuthStateChange, signInWithGoogle, signOutUser } from '@/lib/firebase';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
 
 interface AuthContextType {
-  user: User | null;
+  user: any | null;
   dbUser: any | null;
   loading: boolean;
-  signIn: () => Promise<void>;
+  signIn: () => void;
   signOut: () => Promise<void>;
 }
 
@@ -27,16 +24,25 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const queryClient = useQueryClient();
 
-  // Fetch database user info when Firebase user is available
+  // Check for existing session on load
+  useEffect(() => {
+    const storedUser = localStorage.getItem('demo_user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+    setLoading(false);
+  }, []);
+
+  // Fetch database user info when user is available
   const { data: dbUser } = useQuery({
-    queryKey: ['/api/users/firebase', user?.uid],
-    enabled: !!user?.uid,
+    queryKey: ['/api/users/demo', user?.id],
+    enabled: !!user?.id,
     queryFn: async () => {
-      const response = await fetch(`/api/users/firebase/${user?.uid}`);
+      const response = await fetch(`/api/users/demo/${user?.id}`);
       if (response.status === 404) {
         return null; // User doesn't exist in database yet
       }
@@ -47,27 +53,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     },
   });
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChange((firebaseUser) => {
-      setUser(firebaseUser);
-      setLoading(false);
-    });
-
-    return unsubscribe;
-  }, []);
-
-  const signIn = async () => {
-    try {
-      await signInWithGoogle();
-    } catch (error) {
-      console.error('Sign in error:', error);
-      throw error;
-    }
+  const signIn = () => {
+    // Simple demo authentication
+    const demoUser = {
+      id: 'demo_user_123',
+      name: 'Demo User',
+      email: 'demo@cartoonclassroom.com'
+    };
+    setUser(demoUser);
+    localStorage.setItem('demo_user', JSON.stringify(demoUser));
   };
 
   const signOut = async () => {
     try {
-      await signOutUser();
+      setUser(null);
+      localStorage.removeItem('demo_user');
       queryClient.clear(); // Clear all cached data on sign out
     } catch (error) {
       console.error('Sign out error:', error);
