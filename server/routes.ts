@@ -30,7 +30,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error('Validation errors:', error.errors);
         return res.status(400).json({ error: "Invalid user data", details: error.errors });
       }
-      res.status(500).json({ error: "Failed to create user", details: error.message });
+      res.status(500).json({ error: "Failed to create user", details: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -110,8 +110,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Story not found" });
       }
       
-      res.json(story);
+      // Make sure panels is available in the response
+      // If story.panels is missing but story.content has the data, parse it
+      let storyWithPanels = story;
+      if (!story.panels && story.content) {
+        try {
+          const contentData = JSON.parse(story.content);
+          storyWithPanels = {
+            ...story,
+            panels: contentData.panels || []
+          };
+        } catch (parseError) {
+          console.error('Failed to parse story content:', parseError);
+        }
+      }
+      
+      res.json(storyWithPanels);
     } catch (error) {
+      console.error('Get story error:', error);
       res.status(500).json({ error: "Failed to get story" });
     }
   });
