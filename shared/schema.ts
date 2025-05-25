@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  firebaseUid: text("firebase_uid").notNull().unique(),
+  externalId: text("external_id").notNull().unique(),
   name: text("name").notNull(),
   age: integer("age").notNull(),
   class: text("class").notNull(),

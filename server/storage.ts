@@ -1,9 +1,11 @@
 import { users, stories, textbooks, achievements, userProgress, type User, type InsertUser, type Story, type InsertStory, type Textbook, type InsertTextbook, type Achievement, type InsertAchievement, type UserProgress, type InsertUserProgress } from "@shared/schema";
+import { db } from './db';
+import { eq } from 'drizzle-orm';
 
 export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
-  getUserByFirebaseUid(firebaseUid: string): Promise<User | undefined>;
+  getUserByExternalId(externalId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<InsertUser>): Promise<User>;
 
