@@ -368,17 +368,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
       }
 
-      // Return the generated story
-      const storyResponse = {
-        id: Math.floor(Math.random() * 1000),
+      // Save the generated story to database
+      const storyToSave = {
         userId,
         subject,
         topic,
         title: storyData.title,
         content: JSON.stringify(storyData),
-        panels: storyData.panels,
-        isLearned: false,
-        createdAt: new Date()
+        isLearned: false
+      };
+
+      const savedStory = await storage.createStory(storyToSave);
+      
+      // Return the saved story with panels for display
+      const storyResponse = {
+        ...savedStory,
+        panels: storyData.panels
       };
 
       res.json(storyResponse);
