@@ -1,0 +1,399 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Baloo+2:wght@400;500;600;700&display=swap');
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --primary: 207 90% 54%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 60 4.8% 95.9%;
+  --secondary-foreground: 24 9.8% 10%;
+  --accent: 60 4.8% 95.9%;
+  --accent-foreground: 24 9.8% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 20 14.3% 4.1%;
+  --radius: 0.5rem;
+  
+  /* Custom CartoonClassroom colors */
+  --sky-custom: 143 83% 76%; /* #8FD3F4 */
+  --pink-custom: 0 27% 95%; /* #FCE2E2 */
+  --yellow-custom: 45 93% 64%; /* #FCD34D */
+  --green-custom: 156 73% 58%; /* #34D399 */
+  --purple-custom: 231 89% 74%; /* #818CF8 */
+  --indigo-custom: 213 93% 68%; /* #60A5FA */
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 207 90% 54%;
+  --primary-foreground: 211 100% 99%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 4.9% 83.9%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-baloo antialiased bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Custom font families */
+  .font-fredoka {
+    font-family: 'Fredoka One', cursive;
+  }
+  
+  .font-baloo {
+    font-family: 'Baloo 2', cursive;
+  }
+
+  /* Custom animations */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .animate-bounce-slow {
+    animation: bounce 2s infinite;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse 3s infinite;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
+
+  /* Line clamp utilities */
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0px);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Custom gradient backgrounds */
+.gradient-bg {
+  background: linear-gradient(135deg, hsl(var(--sky-custom)) 0%, hsl(var(--pink-custom)) 100%);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, hsl(var(--purple-custom)), hsl(var(--pink-custom)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Comic panel styles */
+.comic-panel {
+  background: linear-gradient(45deg, #FFFAE5 0%, #E0F7FA 100%);
+  border: 3px solid #374151;
+  border-radius: 20px;
+  position: relative;
+}
+
+.comic-panel::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 20px;
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 15px solid #374151;
+}
+
+/* Subject card hover effects */
+.subject-card {
+  transition: all 0.3s ease;
+}
+
+.subject-card:hover {
+  transform: scale(1.05) translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Story panel animations */
+.story-panel {
+  animation: slideUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.story-panel:nth-child(1) { 
+  animation-delay: 0.1s; 
+}
+
+.story-panel:nth-child(2) { 
+  animation-delay: 0.3s; 
+}
+
+.story-panel:nth-child(3) { 
+  animation-delay: 0.5s; 
+}
+
+.story-panel:nth-child(4) { 
+  animation-delay: 0.7s; 
+}
+
+/* Achievement badge */
+.achievement-badge {
+  background: linear-gradient(45deg, hsl(var(--yellow-custom)) 0%, #F59E0B 100%);
+  animation: scaleIn 0.5s ease-out, bounce 1s ease-in-out 0.5s;
+}
+
+/* Button ripple effect */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  animation: ripple-animation 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes ripple-animation {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* Navigation styles */
+.nav-tab.active {
+  position: relative;
+}
+
+.nav-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 3px;
+  background: currentColor;
+  border-radius: 2px;
+}
+
+/* Custom scrollbar styles */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Custom color utilities */
+.text-sky-custom {
+  color: hsl(var(--sky-custom));
+}
+
+.bg-sky-custom {
+  background-color: hsl(var(--sky-custom));
+}
+
+.text-pink-custom {
+  color: hsl(var(--pink-custom));
+}
+
+.bg-pink-custom {
+  background-color: hsl(var(--pink-custom));
+}
+
+.text-yellow-custom {
+  color: hsl(var(--yellow-custom));
+}
+
+.bg-yellow-custom {
+  background-color: hsl(var(--yellow-custom));
+}
+
+.text-green-custom {
+  color: hsl(var(--green-custom));
+}
+
+.bg-green-custom {
+  background-color: hsl(var(--green-custom));
+}
+
+.text-purple-custom {
+  color: hsl(var(--purple-custom));
+}
+
+.bg-purple-custom {
+  background-color: hsl(var(--purple-custom));
+}
+
+.text-indigo-custom {
+  color: hsl(var(--indigo-custom));
+}
+
+.bg-indigo-custom {
+  background-color: hsl(var(--indigo-custom));
+}
+
+/* Hover variants */
+.hover\:bg-yellow-custom:hover {
+  background-color: hsl(45 93% 54%); /* Darker shade */
+}
+
+.hover\:bg-green-custom:hover {
+  background-color: hsl(156 73% 48%); /* Darker shade */
+}
+
+.hover\:bg-purple-custom:hover {
+  background-color: hsl(231 89% 64%); /* Darker shade */
+}
+
+.hover\:bg-indigo-custom:hover {
+  background-color: hsl(213 93% 58%); /* Darker shade */
+}
+
+/* Loading and skeleton styles */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Focus states for accessibility */
+.focus\:ring-purple-custom:focus {
+  --tw-ring-color: hsl(var(--purple-custom));
+}
+
+.focus\:border-purple-custom:focus {
+  border-color: hsl(var(--purple-custom));
+}
+
+/* Enhanced button styles */
+.btn-primary {
+  @apply bg-yellow-custom hover:bg-yellow-500 text-white font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 ease-in-out;
+}
+
+.btn-secondary {
+  @apply bg-green-custom hover:bg-green-500 text-white font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 ease-in-out;
+}
+
+.btn-purple {
+  @apply bg-purple-custom hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 ease-in-out;
+}
+
+/* Card enhancement */
+.card-hover {
+  @apply transition-all duration-300 ease-in-out transform hover:scale-105 hover:-translate-y-2 shadow-lg hover:shadow-2xl;
+}
+
+/* Text shadow for better readability on gradients */
+.text-shadow {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Glassmorphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Custom container max-widths */
+.container-narrow {
+  max-width: 768px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.container-wide {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
