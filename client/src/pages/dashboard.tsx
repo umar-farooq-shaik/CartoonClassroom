@@ -63,7 +63,7 @@ const featuredTopics = [
 ];
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, dbUser } = useAuth();
   const { progress, achievements, stories, isLoading } = useUser();
 
   if (isLoading) {
@@ -91,7 +91,7 @@ export default function Dashboard() {
         >
           <div className="flex items-center justify-center mb-4">
             <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mr-3">
-              Welcome back, {user?.name || "Learning Star"}!
+              Welcome back, {dbUser?.name || user?.name || "Learning Star"}!
             </h1>
             <motion.div 
               animate={{ 
