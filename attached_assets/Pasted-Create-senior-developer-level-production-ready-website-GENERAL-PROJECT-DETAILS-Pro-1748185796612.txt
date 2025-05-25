@@ -1,0 +1,276 @@
+Create senior developer level, production-ready website 
+---
+
+### 🛠️ GENERAL PROJECT DETAILS
+
+**Project Name**: `CartoonClassroom`
+
+**Tech Stack**:
+
+* **Frontend**: React.js + Tailwind CSS + React Router
+* **Backend**: Node.js + Express.js
+* **Database**: MongoDB (MongoDB Atlas Free Tier)
+* **Auth**: clerk , (earlier done with Firebase Auth and changed to clerk due to issues)
+* **AI**: Google Gemini API (Free Tier)
+* **Hosting**: Replit (for backend) + Vercel (for frontend)
+* **Analytics**: PostHog (optional, free tier)
+* **Chatbot**: Optional GPT-3.5-turbo if free or custom logic fallback
+
+---
+
+### 📄 FILE STRUCTURE
+
+```
+cartoon-classroom/
+├── backend/
+│   ├── server.js
+│   ├── routes/
+│   │   └── storyRoutes.js
+│   └── controllers/
+│       └── storyController.js
+│
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── pages/
+│   │   ├── components/
+│   │   ├── App.js
+│   │   ├── index.js
+│   │   └── routes.js
+│   └── tailwind.config.js
+│
+├── .env
+├── README.md
+```
+
+---
+
+## 🔵 PROMPT FOR EACH PAGE
+
+---
+
+### 1️⃣ **Landing Page**
+
+#### 🧠 Prompt:
+
+> Create a React page `LandingPage.jsx` with a fully colorful design for kids. Background should be a gradient from **sky blue (#8FD3F4)** to **pastel pink (#FCE2E2)**. Floating cartoon icons in the background using subtle CSS animation (like `float`, `bounce`, or `pulse`).
+>
+> Add heading: `"Welcome to CartoonClassroom 🎉"`
+> Subheading: `"Learn with your favorite cartoon characters through fun comic stories!"`
+> Two large, pill-shaped buttons:
+>
+> * **Get Started** (color: `bg-yellow-400 hover:bg-yellow-500 text-white shadow-md`)
+> * **Login** (color: `bg-green-400 hover:bg-green-500 text-white shadow-md`)
+>
+> Use large, comic-style font (e.g., Fredoka One or Baloo) and animate the text with a soft bounce. Use React Router to navigate to `/signup`.
+
+---
+
+### 2️⃣ **Signup & Personalization Page**
+
+#### 🧠 Prompt:
+
+> Create a `SignupPage.jsx` with the following inputs styled as colorful input cards:
+>
+> * Name (Text Input)
+> * Age (Dropdown)
+> * Class (Dropdown)
+> * Location (Autocomplete Input)
+> * Favorite Cartoons (Search Input + `+ Add` Button)
+>
+> Use background color: `bg-gradient-to-r from-pink-200 to-yellow-100`
+>
+> Button to proceed:
+> `"🎯 Start Learning"` — `bg-blue-400 text-white rounded-full px-6 py-3 hover:bg-blue-500`
+>
+> Save this information to MongoDB through Express backend.
+
+---
+
+### 3️⃣ **Subject Selection Dashboard**
+
+#### 🧠 Prompt:
+
+> Create a `DashboardPage.jsx` with 5 cards for each subject:
+>
+> * 📐 Math
+> * 🧪 Science
+> * 🌍 Social
+> * 💬 English
+> * 💡 Life Skills
+>
+> Each card should have:
+>
+> * Bright gradient background (e.g., Math: `from-yellow-200 to-pink-100`)
+> * Fun icon
+> * Hover grow effect `scale-105 transition duration-300 ease-in-out`
+>
+> Clicking on any subject routes to `/learn/:subject`.
+
+---
+
+### 4️⃣ **Topic Input Page**
+
+#### 🧠 Prompt:
+
+> Create `TopicInputPage.jsx`. Ask:
+>
+> "🧠 What do you want to learn today in \[subject]?"
+>
+> Input box with placeholder: `"Type your topic, like Gravity, Fractions, etc..."`
+>
+> Below that, show:
+>
+> * Suggested topics in colored pill buttons (generated from a static JSON for now).
+> * Button: `"✨ Generate Story"` — `bg-purple-400 text-white px-6 py-3 rounded-full hover:bg-purple-500`
+>
+> On click, call backend API to generate a story using Gemini API and user preferences.
+
+---
+
+### 5️⃣ **Comic Story Page**
+
+#### 🧠 Prompt:
+
+> Create `StoryPage.jsx` to show story text in comic-style panels:
+>
+> * Panel design: Each paragraph is a bordered box with light pastel background (`bg-yellow-50`, `bg-pink-50`, etc.), cartoon character emoji in the corner, and large font with bold character names.
+>
+> * Apply slide-in animation from the bottom for each panel.
+>
+> Add the following buttons at the bottom:
+>
+> * 🔁 Refresh Story — `bg-indigo-400 text-white rounded-md px-4 py-2`
+> * ❓ Ask a Doubt — opens chatbot sidebar
+> * ✅ Mark as Learned — changes color to green
+> * 📥 Download Story — `bg-gray-200 hover:bg-gray-300`
+> * 📤 Share — copy link
+>
+> After story completion, show a **badge popup** (e.g., “🎖️ Super Science Learner!”)
+
+---
+
+### 6️⃣ **Doubt Chatbot (Optional)**
+
+#### 🧠 Prompt:
+
+> Create a side drawer component `<DoubtBot />` that slides in with animation.
+>
+> * Style it like a chat with a friendly cartoon avatar.
+> * Use Gemini API or hardcoded logic for now to simulate doubt response.
+
+---
+
+### 7️⃣ **History Page**
+
+#### 🧠 Prompt:
+
+> Create `HistoryPage.jsx` to show previously learned stories:
+>
+> * Grid of colorful tiles (like story books)
+> * Filter by Subject
+> * Date, Badge Icon, Title shown
+> * `onClick` opens the story again
+
+---
+
+### 8️⃣ **Comic Textbook Builder Page**
+
+#### 🧠 Prompt:
+
+> Create `TextbookPage.jsx`. Show a button:
+> `"📚 Add this story to My Comic Textbook"`
+>
+> Allow kid to group stories under custom names (e.g., "Cool Math Stories")
+> Show list of created textbooks with collapsible panels.
+
+---
+
+### 9️⃣ **Achievements & Progress Page**
+
+#### 🧠 Prompt:
+
+> Create `AchievementsPage.jsx`. Show:
+>
+> * Total topics learned
+> * Badges earned (emoji-based)
+> * Time spent
+> * Graph of progress (use Recharts)
+>
+> Add fun animations when user hits new milestones. Example:
+> `"🎉 You just unlocked the “Fast Learner” Badge!"`
+
+---
+
+### 🔒 Auth & API Connection (For AI Agent)
+
+#### Backend Prompt:
+
+> Create an Express.js backend:
+>
+> * Route: `/api/story` → Receives topic, subject, user prefs → calls Gemini API to generate comic story
+> * Route: `/api/user` → POST for signup details, GET for progress
+> * MongoDB Models: User, Story, Textbook
+> * Use environment variable for Gemini API key
+
+---
+
+### 🔐 Auth Prompt:
+
+> Use Firebase Auth to authenticate users.
+> Frontend should have `useAuthContext` to protect routes like `/learn`, `/story`, `/textbook`.
+
+---
+
+### 🎨 Global Styles (Tailwind)
+
+```js
+// tailwind.config.js
+colors: {
+  yellow: {
+    50: '#FFFAE5',
+    100: '#FFF3BF',
+    400: '#FCD34D',
+  },
+  pink: {
+    50: '#FCE2E2',
+    100: '#FADADD',
+  },
+  sky: {
+    100: '#E0F7FA',
+    200: '#8FD3F4',
+  },
+  green: {
+    400: '#34D399',
+  },
+  blue: {
+    400: '#60A5FA',
+  },
+  indigo: {
+    400: '#818CF8',
+  },
+}
+```
+
+---
+
+## 📸 IMAGE ASSETS TO ADD
+
+Ask Replit AI Agent to:
+
+* Leave `<img src="/images/cartoon_bg.png" />` placeholders
+* Add image folders to `/public/images/`
+* Example: floating books, stars, cartoon clouds, emoji badges
+
+---
+
+## 🧠 BONUS TIPS FOR AI AGENT
+
+* Use `localStorage` to persist state between reloads.
+* Use `React Context` for auth and user preferences.
+* Use animation libraries like `Framer Motion` or Tailwind transitions.
+* Use `uuid` for creating story/book IDs.
+* Use `dotenv` in backend to store Gemini key securely.
+
+---
+
