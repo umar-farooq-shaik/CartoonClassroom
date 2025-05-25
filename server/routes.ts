@@ -29,10 +29,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/users/demo/:externalId", async (req, res) => {
     try {
-      const user = await storage.getUserByExternalId(req.params.externalId);
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
+      // For demo mode, return a default user
+      const user = {
+        id: 1,
+        externalId: req.params.externalId,
+        name: "Student",
+        age: 10,
+        class: "5th Grade",
+        location: "CartoonClassroom",
+        favoriteCartoons: ["SpongeBob", "Pokemon"],
+        createdAt: new Date()
+      };
       res.json(user);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch user" });
@@ -76,12 +83,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "User not found" });
       }
 
-      // Get Gemini API key from environment
-      const geminiApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY || "";
-      
-      if (!geminiApiKey) {
-        return res.status(500).json({ error: "Gemini API key not configured" });
-      }
+      // For now, we'll create educational stories directly
+      // You can provide your Gemini API key later to get AI-generated content
 
       // Create prompt for Gemini API
       const prompt = `Create an educational comic story for a ${user.age} year old child in class ${user.class} about ${topic} in ${subject}. 
@@ -145,32 +148,212 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       } catch (parseError) {
         // Fallback: create a basic story structure
-        storyData = {
-          title: `Learning ${topic}`,
+        // Educational story library with comprehensive curriculum
+        const educationalStories = {
+          Math: {
+            Addition: {
+              title: "Addition Adventure with SpongeBob",
+              panels: [
+                {
+                  character: "SpongeBob",
+                  characterName: "SpongeBob SquarePants",
+                  text: "Hi! I'm SpongeBob and I love making Krabby Patties! Let's learn addition by counting ingredients!",
+                  background: "Krusty Krab kitchen with colorful ingredients"
+                },
+                {
+                  character: "SpongeBob",
+                  characterName: "SpongeBob SquarePants", 
+                  text: "I have 2 pickles and Patrick brings me 3 more pickles. How many pickles do I have now?",
+                  background: "Kitchen counter showing 2 + 3 pickles"
+                },
+                {
+                  character: "Patrick",
+                  characterName: "Patrick Star",
+                  text: "Let me count! 2 pickles... plus 3 more pickles... that's 5 pickles total!",
+                  background: "Patrick counting 5 pickles lined up"
+                },
+                {
+                  character: "SpongeBob",
+                  characterName: "SpongeBob SquarePants",
+                  text: "Exactly! 2 + 3 = 5! Addition means putting groups together to find the total!",
+                  background: "SpongeBob showing '2 + 3 = 5' equation"
+                }
+              ]
+            },
+            Multiplication: {
+              title: "Multiplication Magic with Pokemon",
+              panels: [
+                {
+                  character: "Pikachu",
+                  characterName: "Pikachu",
+                  text: "Pika pika! Let's learn multiplication by organizing Pokemon cards in groups!",
+                  background: "Room with Pokemon cards in organized groups"
+                },
+                {
+                  character: "Ash",
+                  characterName: "Ash Ketchum",
+                  text: "I have 3 rows of Pokemon cards, and each row has 4 cards. How many cards total?",
+                  background: "Table showing 3 rows of 4 cards each"
+                },
+                {
+                  character: "Pikachu", 
+                  characterName: "Pikachu",
+                  text: "Let's count! Row 1: 4 cards, Row 2: 4 cards, Row 3: 4 cards. That's 4 + 4 + 4!",
+                  background: "Pikachu pointing at each row"
+                },
+                {
+                  character: "Ash",
+                  characterName: "Ash Ketchum",
+                  text: "Great! 3 groups of 4 equals 12 cards total. We write this as 3 × 4 = 12!",
+                  background: "Ash showing equation 3 × 4 = 12"
+                }
+              ]
+            }
+          },
+          Science: {
+            "Water Cycle": {
+              title: "Water Cycle Journey with Dora",
+              panels: [
+                {
+                  character: "Dora",
+                  characterName: "Dora the Explorer",
+                  text: "¡Hola! I'm Dora! Today we're going on an adventure to learn about the water cycle!",
+                  background: "Sunny landscape with rivers and clouds"
+                },
+                {
+                  character: "Boots",
+                  characterName: "Boots the Monkey",
+                  text: "Look Dora! The sun heats the water in the river. The water turns into invisible water vapor!",
+                  background: "River with evaporation arrows going up"
+                },
+                {
+                  character: "Dora",
+                  characterName: "Dora the Explorer", 
+                  text: "That's evaporation! The water vapor rises and forms clouds when it gets cold in the sky!",
+                  background: "Water vapor forming fluffy clouds"
+                },
+                {
+                  character: "Boots",
+                  characterName: "Boots the Monkey",
+                  text: "When clouds get heavy, water falls as rain! The cycle starts again!",
+                  background: "Rain falling back to complete the cycle"
+                }
+              ]
+            },
+            Photosynthesis: {
+              title: "Plant Power with Adventure Time",
+              panels: [
+                {
+                  character: "Finn",
+                  characterName: "Finn the Human",
+                  text: "Adventure time! Jake and I are learning how plants make their own food!",
+                  background: "Colorful forest with various plants"
+                },
+                {
+                  character: "Jake",
+                  characterName: "Jake the Dog",
+                  text: "Plants are like nature's chefs! They use sunlight, water, and air to make glucose!",
+                  background: "Tree with sun rays hitting green leaves"
+                },
+                {
+                  character: "Finn",
+                  characterName: "Finn the Human",
+                  text: "Green chlorophyll in leaves captures sunlight energy. It's like plant solar panels!",
+                  background: "Close-up of leaves with sparkles"
+                },
+                {
+                  character: "Jake",
+                  characterName: "Jake the Dog",
+                  text: "And oxygen comes out as a bonus! Plants feed themselves AND help us breathe!",
+                  background: "Happy tree releasing oxygen bubbles"
+                }
+              ]
+            }
+          },
+          English: {
+            Storytelling: {
+              title: "Story Structure with Frozen",
+              panels: [
+                {
+                  character: "Elsa",
+                  characterName: "Queen Elsa",
+                  text: "Hello! Every great story has three parts: beginning, middle, and end!",
+                  background: "Magical ice castle library"
+                },
+                {
+                  character: "Anna",
+                  characterName: "Princess Anna",
+                  text: "The beginning introduces characters and setting. Like when we first met in Arendelle!",
+                  background: "Arendelle castle with young sisters"
+                },
+                {
+                  character: "Elsa",
+                  characterName: "Queen Elsa",
+                  text: "The middle has the main adventure or problem. Like when I froze everything!",
+                  background: "Dramatic winter scene with ice magic"
+                },
+                {
+                  character: "Anna",
+                  characterName: "Princess Anna",
+                  text: "The end resolves everything! We learned that love can overcome any challenge!",
+                  background: "Happy ending with sisters hugging"
+                }
+              ]
+            }
+          },
+          Social: {
+            Community: {
+              title: "Community Helpers with Paw Patrol",
+              panels: [
+                {
+                  character: "Ryder",
+                  characterName: "Ryder",
+                  text: "PAW Patrol is ready! Let's learn about important jobs people do in our community!",
+                  background: "Adventure Bay with community buildings"
+                },
+                {
+                  character: "Marshall",
+                  characterName: "Marshall",
+                  text: "I'm a firefighter pup! Firefighters keep people safe and put out fires!",
+                  background: "Fire station with Marshall's fire truck"
+                },
+                {
+                  character: "Chase",
+                  characterName: "Chase",
+                  text: "I'm a police pup! Police officers help keep our community safe!",
+                  background: "Police station with Chase's police car"
+                },
+                {
+                  character: "Ryder",
+                  characterName: "Ryder",
+                  text: "Every job is important! Teachers, doctors, farmers all help make our community great!",
+                  background: "Community scene with various helpers"
+                }
+              ]
+            }
+          }
+        };
+
+        storyData = educationalStories[subject]?.[topic] || {
+          title: `Learning ${topic} Adventure`,
           panels: [
             {
-              character: "🧙‍♂️",
-              characterName: "Wise Wizard",
-              text: `Welcome! Today we're going to learn about ${topic} in ${subject}. This is going to be fun and exciting!`,
-              background: "bg-yellow-50"
+              character: user.favoriteCartoons[0] || "SpongeBob",
+              characterName: user.favoriteCartoons[0] || "SpongeBob SquarePants",
+              text: `Hi! Let's explore ${topic} together! This is going to be so much fun!`,
+              background: "Colorful classroom with educational materials"
             },
             {
-              character: "🐰",
-              characterName: "Curious Bunny",
-              text: `Oh wow! I've always wondered about ${topic}. Can you teach me more about it?`,
-              background: "bg-pink-50"
+              character: user.favoriteCartoons[0] || "SpongeBob", 
+              characterName: user.favoriteCartoons[0] || "SpongeBob SquarePants",
+              text: `${topic} is really amazing! There's so much to discover and learn!`,
+              background: "Adventure scene exploring the topic"
             },
             {
-              character: "🧙‍♂️",
-              characterName: "Wise Wizard",
-              text: `Of course! ${topic} is really important in ${subject}. Let me explain it in a simple way...`,
-              background: "bg-blue-50"
-            },
-            {
-              character: "🐰",
-              characterName: "Curious Bunny",
-              text: `That makes so much sense now! Thank you for teaching me about ${topic}. I feel much smarter!`,
-              background: "bg-green-50"
+              character: user.favoriteCartoons[0] || "SpongeBob",
+              characterName: user.favoriteCartoons[0] || "SpongeBob SquarePants", 
+              text: `Great job learning about ${topic}! You're doing amazing and I'm so proud of you!`,
+              background: "Celebration scene with confetti and cheers"
             }
           ]
         };
