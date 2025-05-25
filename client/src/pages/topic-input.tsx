@@ -97,7 +97,7 @@ export default function TopicInput() {
           <Card className="shadow-2xl border-0 bg-white">
             <CardHeader className="text-center pb-6">
               <CardTitle className="font-fredoka text-3xl md:text-4xl text-gray-800 mb-4">
-                {subjectIcon} What do you want to learn today in {subjectName}?
+                🧠 What do you want to learn today in {subjectName}?
               </CardTitle>
               <p className="text-lg text-gray-600">
                 Tell us what interests you and we'll create an amazing story just for you!
@@ -120,7 +120,7 @@ export default function TopicInput() {
                     <Button
                       type="submit"
                       disabled={generateStoryMutation.isPending || !topic.trim()}
-                      className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-4 px-8 rounded-full text-xl shadow-xl transform hover:scale-105 transition duration-300 ease-in-out"
+                      className="bg-purple-400 hover:bg-purple-500 text-white font-bold py-3 px-6 rounded-full text-xl shadow-xl transform hover:scale-105 transition duration-300 ease-in-out"
                     >
                       {generateStoryMutation.isPending ? (
                         <>

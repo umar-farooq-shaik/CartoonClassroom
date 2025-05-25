@@ -48,19 +48,14 @@ export const Navigation = () => {
           <div className="flex items-center space-x-3">
             {user && dbUser ? (
               <>
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-green-400 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">
-                      {dbUser.name?.charAt(0).toUpperCase() || 'U'}
-                    </span>
-                  </div>
-                  <span className="hidden md:block text-gray-700 font-medium">
-                    {dbUser.name}
-                  </span>
-                </div>
                 <Button onClick={signOut} variant="outline" size="sm">
                   Sign Out
                 </Button>
+                <div className="w-8 h-8 bg-green-400 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">
+                    {dbUser.name?.charAt(0).toUpperCase() || 'U'}
+                  </span>
+                </div>
               </>
             ) : (
               <div className="flex items-center">
