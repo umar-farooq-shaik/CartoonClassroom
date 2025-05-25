@@ -45,8 +45,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const result = await db.insert(users).values(insertUser).returning();
-    return result[0];
+    try {
+      // Ensure favoriteCartoons is properly formatted as array
+      const userData = {
+        ...insertUser,
+        favoriteCartoons: Array.isArray(insertUser.favoriteCartoons) 
+          ? insertUser.favoriteCartoons 
+          : insertUser.favoriteCartoons ? [insertUser.favoriteCartoons] : []
+      };
+      
+      const result = await db.insert(users).values(userData).returning();
+      return result[0];
+    } catch (error) {
+      console.error('Database insert error:', error);
+      throw error;
+    }
   }
 
   async updateUser(id: number, updates: Partial<InsertUser>): Promise<User> {

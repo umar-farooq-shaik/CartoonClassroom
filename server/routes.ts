@@ -8,22 +8,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User registration endpoint
   app.post("/api/users", async (req, res) => {
     try {
-      const userData = insertUserSchema.parse(req.body);
+      console.log('Received user data:', req.body);
       
-      // Check if user already exists
-      const existingUser = await storage.getUserByExternalId(userData.externalId);
+      // Check if user already exists first
+      const existingUser = await storage.getUserByExternalId(req.body.externalId);
       if (existingUser) {
-        return res.json(existingUser); // Return existing user instead of error
+        console.log('User already exists, returning existing user');
+        return res.json(existingUser);
       }
+      
+      // Parse and validate the data
+      const userData = insertUserSchema.parse(req.body);
+      console.log('Parsed user data:', userData);
       
       const user = await storage.createUser(userData);
+      console.log('Created user successfully:', user);
       res.json(user);
     } catch (error) {
+      console.error('User creation error details:', error);
       if (error instanceof z.ZodError) {
+        console.error('Validation errors:', error.errors);
         return res.status(400).json({ error: "Invalid user data", details: error.errors });
       }
-      console.error('User creation error:', error);
-      res.status(500).json({ error: "Failed to create user" });
+      res.status(500).json({ error: "Failed to create user", details: error.message });
     }
   });
 
