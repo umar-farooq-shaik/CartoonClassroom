@@ -33,6 +33,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get user by external ID
+  app.get("/api/users/external/:externalId", async (req, res) => {
+    try {
+      const { externalId } = req.params;
+      const user = await storage.getUserByExternalId(externalId);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get user" });
+    }
+  });
+
   app.get("/api/auth/user/:externalId", async (req, res) => {
     try {
       const { externalId } = req.params;

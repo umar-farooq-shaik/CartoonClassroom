@@ -39,10 +39,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Fetch database user info when user is available
   const { data: dbUser } = useQuery({
-    queryKey: ['/api/users/demo', user?.id],
+    queryKey: ['/api/users/external', user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      const response = await fetch(`/api/users/demo/${user?.id}`);
+      const response = await fetch(`/api/users/external/${user?.id}`);
       if (response.status === 404) {
         return null; // User doesn't exist in database yet
       }
