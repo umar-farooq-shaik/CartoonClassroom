@@ -23,6 +23,13 @@ export default function Story() {
 
   const { data: story, isLoading } = useQuery({
     queryKey: ['/api/stories', storyId],
+    queryFn: async () => {
+      const res = await fetch(`/api/stories/${storyId}`);
+      if (!res.ok) {
+        throw new Error('Failed to fetch story');
+      }
+      return res.json();
+    },
     enabled: !!storyId,
   });
 
@@ -150,16 +157,16 @@ export default function Story() {
 
         {/* Story Panels */}
         <div className="space-y-8 mb-12">
-          {story.panels.map((panel: any, index: number) => (
+          {Array.isArray(story.panels) && story.panels.map((panel: any, index: number) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.2 }}
             >
-              <Card className={`${panel.background} border-4 border-gray-700 rounded-3xl shadow-lg relative`}>
+              <Card className="border-4 border-gray-700 rounded-3xl shadow-lg relative bg-white">
                 <div className="absolute -top-3 -right-3 text-4xl bg-white rounded-full p-2 shadow-lg">
-                  {panel.character}
+                  {panel.character === 'ben10' ? '👦' : panel.character === 'pikachu' ? '⚡' : '😊'}
                 </div>
                 <CardContent className="p-6">
                   <h3 className="font-fredoka text-xl text-purple-700 mb-3">
@@ -167,6 +174,9 @@ export default function Story() {
                   </h3>
                   <p className="text-lg leading-relaxed text-gray-800">
                     {panel.text}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-3 italic">
+                    Scene: {panel.background}
                   </p>
                 </CardContent>
               </Card>
