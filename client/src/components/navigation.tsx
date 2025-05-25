@@ -63,20 +63,13 @@ export const Navigation = () => {
                 </Button>
               </>
             ) : (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center">
                 <Button 
-                  onClick={signIn} 
+                  onClick={() => setLocation('/signup')} 
                   variant="default" 
                   className="bg-gradient-to-r from-purple-500 to-pink-500 text-white"
                 >
                   Sign In
-                </Button>
-                <Button
-                  onClick={() => setLocation('/signup')}
-                  variant="outline"
-                  className="border-purple-300 hover:bg-purple-50"
-                >
-                  Sign Up
                 </Button>
               </div>
             )}

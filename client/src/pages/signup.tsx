@@ -19,7 +19,7 @@ const popularCartoons = [
 ];
 
 export default function Signup() {
-  const { user, dbUser } = useAuth();
+  const { user, dbUser, signIn } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -39,8 +39,10 @@ export default function Signup() {
       const response = await apiRequest('POST', '/api/users', userData);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/users/external'] });
+      // Sign in the user after successful profile creation
+      signIn();
       toast({
         title: "Welcome to CartoonClassroom! 🎉",
         description: "Your profile is ready! Let's start learning!",
@@ -63,11 +65,8 @@ export default function Signup() {
     return null;
   }
 
-  // Redirect if not authenticated
-  if (!user) {
-    setLocation('/');
-    return null;
-  }
+  // We'll handle authentication differently - don't redirect
+  // This allows new users to sign up directly
 
   const addCartoon = () => {
     if (cartoonInput.trim() && !formData.favoriteCartoons.includes(cartoonInput.trim())) {
