@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/auth-context';
 import { useMutation } from '@tanstack/react-query';
 import { generateStory } from '@/lib/gemini';
-import { useLocation } from 'wouter';
+import { useLocation, useParams } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
 
 const suggestedTopicsBySubject: Record<string, string[]> = {
@@ -33,10 +33,27 @@ export default function TopicInput() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [topic, setTopic] = useState('');
+  const params = useParams();
   
-  // Get subject from URL
-  const currentPath = window.location.pathname;
-  const subject = currentPath.split('/').pop() || 'math';
+  // Get subject from URL parameters or query string
+  const getSubject = () => {
+    // Try to get from URL params first (/learn/math)
+    if (params.subject) {
+      return params.subject.toLowerCase();
+    }
+    
+    // Try to get from query string (/topic-input?subject=Math)
+    const urlParams = new URLSearchParams(window.location.search);
+    const querySubject = urlParams.get('subject');
+    if (querySubject) {
+      return querySubject.toLowerCase();
+    }
+    
+    // Default fallback
+    return 'math';
+  };
+  
+  const subject = getSubject();
   
   const subjectName = subject.charAt(0).toUpperCase() + subject.slice(1);
   const subjectIcon = subjectEmojis[subject] || '📚';
