@@ -225,7 +225,7 @@ class SimpleMemStorage implements IStorage {
   }
 }
 
-export const storage = new SimpleMemStorage();
+export const storage = new DatabaseStorage();
 
 class MemStorage implements IStorage {
   private users: Map<number, User>;
