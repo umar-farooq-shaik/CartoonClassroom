@@ -42,7 +42,6 @@ export default function Signup() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/users/external'] });
       // Sign in the user after successful profile creation
-      signIn();
       toast({
         title: "Welcome to CartoonClassroom! 🎉",
         description: "Your profile is ready! Let's start learning!",
