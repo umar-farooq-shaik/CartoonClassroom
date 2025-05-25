@@ -8,17 +8,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User routes
   app.post("/api/users", async (req, res) => {
     try {
-      const userData = insertUserSchema.parse(req.body);
-      const user = await storage.createUser(userData);
+      // For demo mode, we need to add the externalId from the authenticated user
+      const userData = {
+        ...req.body,
+        externalId: req.body.externalId || 'demo_user_123', // Default demo external ID
+        favoriteCartoons: req.body.favoriteCartoons || []
+      };
+      
+      const validatedData = insertUserSchema.parse(userData);
+      const user = await storage.createUser(validatedData);
       res.json(user);
     } catch (error) {
+      console.log('User creation error:', error);
       res.status(400).json({ error: error instanceof Error ? error.message : "Invalid user data" });
     }
   });
 
-  app.get("/api/users/firebase/:firebaseUid", async (req, res) => {
+  app.get("/api/users/demo/:externalId", async (req, res) => {
     try {
-      const user = await storage.getUserByFirebaseUid(req.params.firebaseUid);
+      const user = await storage.getUserByExternalId(req.params.externalId);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
