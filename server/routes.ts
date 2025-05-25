@@ -375,6 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         topic,
         title: storyData.title,
         content: JSON.stringify(storyData),
+        panels: storyData.panels,
         isLearned: false
       };
 
@@ -382,8 +383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Return the saved story with panels for display
       const storyResponse = {
-        ...savedStory,
-        panels: storyData.panels
+        ...savedStory
       };
 
       res.json(storyResponse);
