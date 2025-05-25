@@ -3,8 +3,8 @@ import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 
 export const Navigation = () => {
-  const [location] = useLocation();
-  const { user, dbUser, signOut } = useAuth();
+  const [location, setLocation] = useLocation();
+  const { user, dbUser, signIn, signOut } = useAuth();
 
   const navItems = [
     { path: '/', label: 'Home', icon: '🏠' },
@@ -63,7 +63,22 @@ export const Navigation = () => {
                 </Button>
               </>
             ) : (
-              <div className="text-gray-600">Welcome!</div>
+              <div className="flex items-center space-x-3">
+                <Button 
+                  onClick={signIn} 
+                  variant="default" 
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+                >
+                  Sign In
+                </Button>
+                <Button
+                  onClick={() => setLocation('/signup')}
+                  variant="outline"
+                  className="border-purple-300 hover:bg-purple-50"
+                >
+                  Sign Up
+                </Button>
+              </div>
             )}
           </div>
         </div>

@@ -31,6 +31,18 @@ export default function Landing() {
     <div className="min-h-screen bg-gradient-to-br from-sky-200 via-pink-100 to-yellow-100 relative overflow-hidden">
       {/* Floating Background Icons */}
       <FloatingIcons />
+      
+      {/* Navigation bar with sign-in button */}
+      <div className="absolute top-0 right-0 p-4 z-20">
+        {!user && (
+          <Button 
+            onClick={handleLogin} 
+            className="bg-white text-purple-600 hover:bg-purple-100 font-bold py-2 px-6 rounded-full shadow-lg"
+          >
+            Sign In
+          </Button>
+        )}
+      </div>
 
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16 relative z-10">
@@ -53,14 +65,6 @@ export default function Landing() {
             >
               <Sparkles className="mr-2 h-6 w-6" />
               Get Started
-            </Button>
-
-            <Button
-              onClick={handleLogin}
-              className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-bold py-6 px-12 rounded-full text-xl shadow-xl transform hover:scale-110 transition-all duration-300 border-4 border-white"
-            >
-              <Zap className="mr-2 h-6 w-6" />
-              Login
             </Button>
           </div>
         </div>
