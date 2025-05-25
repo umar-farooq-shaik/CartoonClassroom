@@ -151,33 +151,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-      const prompt = `Create an educational comic story for children about "${topic}" in the subject of ${subject}. 
-      The main character should be ${mainCharacter}. 
-      
+      const prompt = `You are an AI storyteller building creative, beginner-level comic-style stories for children using their favorite cartoon characters. These stories are designed for a website called CartoonClassroom where kids learn through adventures.
+
+      The characters must not directly teach or explain the topic like a textbook — instead, they become part of a fictional funny, emotional, or action-filled story where the concept is shown indirectly.
+
+      Each story must:
+      - Use one or more of the child's favorite cartoon characters
+      - Match the child's age and location for tone and familiarity
+      - Use simple "Explain Like I'm 5" style narration
+      - Use real cartoon catchphrases or personalities
+      - Be text-only and look like a short comic story
+      - Include emotional tone, fun dialogues, character action
+      - Include a moral or key educational takeaway at the end
+
       Format the response as a JSON object with this structure:
       {
-        "title": "Story title",
+        "title": "Story title with an emoji",
+        "content": "The complete story with cartoon character names, dialogues in quotes, short paragraphs, and a moral at the end.",
         "panels": [
           {
             "character": "character_name",
             "characterName": "Character Display Name",
-            "text": "Dialogue and educational content",
+            "text": "Dialogue and action",
             "background": "Scene description"
           }
         ]
       }
       
-      Requirements:
-      - Make it fun and educational for kids aged 5-12
-      - Include 4-6 panels
-      - Explain the topic clearly with examples
-      - Use simple language
-      - Make it engaging with the cartoon character
-      - Include interactive elements when possible
-      
+      Child's Information:
       Topic: ${topic}
       Subject: ${subject}
-      Character: ${mainCharacter}`;
+      Favorite Characters: ["${mainCharacter}"]
+      Age: ${user?.age || 10}
+      Location: ${user?.location || "India"}
+      
+      Create a story about ${topic} in the subject of ${subject} featuring ${mainCharacter} as the main character. Make it engaging, funny, and subtly educational with a moral at the end.`;
 
       const result = await model.generateContent(prompt);
       const response = await result.response;

@@ -155,33 +155,74 @@ export default function Story() {
           </p>
         </motion.div>
 
-        {/* Story Panels */}
-        <div className="space-y-8 mb-12">
-          {Array.isArray(story.panels) && story.panels.map((panel: any, index: number) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
-            >
-              <Card className="border-4 border-gray-700 rounded-3xl shadow-lg relative bg-white">
-                <div className="absolute -top-3 -right-3 text-4xl bg-white rounded-full p-2 shadow-lg">
-                  {panel.character === 'ben10' ? '👦' : panel.character === 'pikachu' ? '⚡' : '😊'}
+        {/* Comic Story Content */}
+        <div className="mb-12">
+          <Card className="border-4 border-gray-700 rounded-3xl shadow-lg bg-white overflow-hidden">
+            <CardContent className="p-8">
+              {story.content ? (
+                <div className="comic-story">
+                  {story.content.split('\n\n').map((paragraph: string, index: number) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: index * 0.1 }}
+                      className="mb-6"
+                    >
+                      <p className="text-lg leading-relaxed text-gray-800">
+                        {paragraph.includes(':') ? (
+                          <>
+                            <span className="font-fredoka text-xl text-purple-700">
+                              {paragraph.split(':')[0]}:
+                            </span>{' '}
+                            {paragraph.split(':').slice(1).join(':')}
+                          </>
+                        ) : (
+                          paragraph
+                        )}
+                      </p>
+                    </motion.div>
+                  ))}
+                  
+                  {/* Moral Highlight */}
+                  {story.content.includes('Moral:') && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.6, delay: 0.8 }}
+                      className="mt-8 p-4 bg-yellow-100 border-l-4 border-yellow-500 rounded"
+                    >
+                      <p className="text-lg font-medium">
+                        {story.content.split('Moral:')[1].trim()}
+                      </p>
+                    </motion.div>
+                  )}
                 </div>
-                <CardContent className="p-6">
-                  <h3 className="font-fredoka text-xl text-purple-700 mb-3">
-                    {panel.characterName}:
-                  </h3>
-                  <p className="text-lg leading-relaxed text-gray-800">
-                    {panel.text}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-3 italic">
-                    Scene: {panel.background}
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+              ) : (
+                <div className="space-y-8">
+                  {Array.isArray(story.panels) && story.panels.map((panel: any, index: number) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 50 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: index * 0.2 }}
+                      className="mb-6"
+                    >
+                      <h3 className="font-fredoka text-xl text-purple-700 mb-3">
+                        {panel.characterName}:
+                      </h3>
+                      <p className="text-lg leading-relaxed text-gray-800">
+                        {panel.text}
+                      </p>
+                      <p className="text-sm text-gray-500 mt-3 italic">
+                        Scene: {panel.background}
+                      </p>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Story Actions */}
