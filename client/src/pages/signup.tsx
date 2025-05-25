@@ -109,7 +109,7 @@ export default function Signup() {
     createUserMutation.mutate({
       externalId: user.uid,
       name: formData.name,
-      age: formData.age,
+      age: parseInt(formData.age),
       class: formData.class,
       location: formData.location,
       favoriteCartoons: formData.favoriteCartoons,

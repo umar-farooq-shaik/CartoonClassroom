@@ -67,6 +67,8 @@ export const userProgress = pgTable("user_progress", {
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
+}).extend({
+  age: z.coerce.number().min(1).max(18),
 });
 
 export const insertStorySchema = createInsertSchema(stories).omit({
