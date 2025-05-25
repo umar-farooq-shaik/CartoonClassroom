@@ -1,372 +1,276 @@
-import type { Express } from "express";
-import { createServer, type Server } from "http";
-import { storage } from "./storage";
-import { insertUserSchema, insertStorySchema, insertTextbookSchema } from "@shared/schema";
+import { Express, Request, Response, NextFunction } from "express";
+import { Server } from "http";
 import { z } from "zod";
+import { storage, IStorage } from "./storage.js";
+import { insertUserSchema, insertStorySchema, insertTextbookSchema, insertAchievementSchema, insertUserProgressSchema } from "../shared/schema.js";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // User routes
-  app.post("/api/users", async (req, res) => {
+  // User registration endpoint
+  app.post("/api/auth/register", async (req, res) => {
     try {
-      // Create user directly for demo authentication
-      const user = {
-        id: 1,
-        externalId: 'demo_user_123',
-        name: req.body.name || 'Student',
-        age: parseInt(req.body.age) || 10,
-        class: req.body.class || '5th Grade',
-        location: req.body.location || 'Unknown',
-        favoriteCartoons: req.body.favoriteCartoons || [],
-        createdAt: new Date()
-      };
+      const userData = insertUserSchema.parse(req.body);
+      const user = await storage.createUser(userData);
+      res.json(user);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid user data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create user" });
+    }
+  });
+
+  // Get user by external ID
+  app.get("/api/auth/user/:externalId", async (req, res) => {
+    try {
+      const { externalId } = req.params;
+      const user = await storage.getUserByExternalId(externalId);
       
-      res.json(user);
-    } catch (error) {
-      console.log('User creation error:', error);
-      res.status(400).json({ error: "Failed to create user profile" });
-    }
-  });
-
-  app.get("/api/users/demo/:externalId", async (req, res) => {
-    try {
-      // For demo mode, return a default user
-      const user = {
-        id: 1,
-        externalId: req.params.externalId,
-        name: "Student",
-        age: 10,
-        class: "5th Grade",
-        location: "CartoonClassroom",
-        favoriteCartoons: ["SpongeBob", "Pokemon"],
-        createdAt: new Date()
-      };
-      res.json(user);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch user" });
-    }
-  });
-
-  app.get("/api/users/:id", async (req, res) => {
-    try {
-      const user = await storage.getUser(parseInt(req.params.id));
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
+      
       res.json(user);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch user" });
+      res.status(500).json({ error: "Failed to get user" });
     }
   });
 
-  app.put("/api/users/:id", async (req, res) => {
+  // Get current user's stories
+  app.get("/api/stories/user", async (req, res) => {
     try {
-      const userId = parseInt(req.params.id);
-      const updates = insertUserSchema.partial().parse(req.body);
-      const user = await storage.updateUser(userId, updates);
-      res.json(user);
+      // For demo purposes, return empty array until user creates stories
+      res.json([]);
     } catch (error) {
-      res.status(400).json({ error: error instanceof Error ? error.message : "Invalid update data" });
+      res.status(500).json({ error: "Failed to get stories" });
     }
   });
 
-  // Story generation using Gemini API
+  // Get stories by subject
+  app.get("/api/stories/subject/:subject", async (req, res) => {
+    try {
+      const { subject } = req.params;
+      const userId = 1; // Demo user ID
+      const stories = await storage.getStoriesBySubject(userId, subject);
+      res.json(stories);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get stories by subject" });
+    }
+  });
+
+  // Get single story
+  app.get("/api/stories/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const story = await storage.getStory(parseInt(id));
+      
+      if (!story) {
+        return res.status(404).json({ error: "Story not found" });
+      }
+      
+      res.json(story);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get story" });
+    }
+  });
+
+  // Story generation endpoint
   app.post("/api/stories/generate", async (req, res) => {
     try {
-      const { topic, subject, userId, userPreferences } = req.body;
+      const { topic, subject, userId } = req.body;
       
       if (!topic || !subject || !userId) {
         return res.status(400).json({ error: "Topic, subject, and userId are required" });
       }
 
-      // Create a default user for story generation
-      const user = {
-        id: userId,
-        externalId: "demo_user_123",
-        name: "Student",
-        age: 10,
-        class: "5th Grade",
-        location: "CartoonClassroom",
-        favoriteCartoons: ["SpongeBob", "Pokemon", "Dora"],
-        createdAt: new Date()
+      // Template stories for educational content
+      const templateStories = {
+        Math: {
+          Addition: {
+            title: "SpongeBob's Krabby Patty Math Adventure",
+            panels: [
+              {
+                character: "spongebob",
+                characterName: "SpongeBob SquarePants",
+                text: "Hi there! I'm SpongeBob and I love making Krabby Patties! Today I need to learn about addition to make the perfect number of patties!",
+                background: "The Krusty Krab kitchen with cooking equipment"
+              },
+              {
+                character: "spongebob",
+                characterName: "SpongeBob SquarePants", 
+                text: "Mr. Krabs asked me to make patties for today! I have 2 patties ready, and I need to make 3 more. Let me count: 2 + 3 = ?",
+                background: "SpongeBob counting patties on the grill"
+              },
+              {
+                character: "spongebob",
+                characterName: "SpongeBob SquarePants",
+                text: "Let me use my fingers to help! 2 patties plus 3 more patties... that's 5 patties total! 2 + 3 = 5!",
+                background: "SpongeBob showing fingers while counting"
+              },
+              {
+                character: "spongebob",
+                characterName: "SpongeBob SquarePants",
+                text: "Fantastic! Now I know that when we ADD numbers together, we get a bigger number! Addition helps me make the right amount of Krabby Patties!",
+                background: "SpongeBob proudly showing 5 perfectly cooked Krabby Patties"
+              }
+            ]
+          },
+          Multiplication: {
+            title: "Pokemon Math Training with Pikachu",
+            panels: [
+              {
+                character: "pikachu",
+                characterName: "Pikachu",
+                text: "Pika pika! I'm Pikachu and I love training! But today I need to learn multiplication to become stronger!",
+                background: "Pokemon training ground with Pokeballs"
+              },
+              {
+                character: "pikachu", 
+                characterName: "Pikachu",
+                text: "I have 3 groups of Pokeballs, and each group has 4 Pokeballs. How many Pokeballs do I have in total?",
+                background: "3 groups of 4 Pokeballs each, clearly separated"
+              },
+              {
+                character: "pikachu",
+                characterName: "Pikachu", 
+                text: "Let me count them all! Group 1: 4 balls, Group 2: 4 balls, Group 3: 4 balls. That's 4 + 4 + 4 = 12!",
+                background: "Pikachu pointing at each group while counting"
+              },
+              {
+                character: "pikachu",
+                characterName: "Pikachu",
+                text: "But there's a faster way! 3 groups × 4 balls = 12 balls total! Multiplication is like repeated addition! Pika pika!",
+                background: "Pikachu celebrating with electric sparks and all 12 Pokeballs"
+              }
+            ]
+          }
+        },
+        Science: {
+          Plants: {
+            title: "Dora's Plant Adventure",
+            panels: [
+              {
+                character: "dora",
+                characterName: "Dora the Explorer",
+                text: "¡Hola! I'm Dora! Today we're going on an adventure to learn about plants! Plants are living things that grow everywhere!",
+                background: "Dora in a beautiful garden with various plants"
+              },
+              {
+                character: "dora",
+                characterName: "Dora the Explorer",
+                text: "Look at this plant! It has roots that drink water from the soil, a stem that stands tall, and leaves that make food from sunlight!",
+                background: "Close-up of a plant showing roots, stem, and leaves"
+              },
+              {
+                character: "dora",
+                characterName: "Dora the Explorer", 
+                text: "Plants need four things to grow: water, sunlight, air, and soil. Just like we need food and water, plants need these to be healthy!",
+                background: "Dora pointing to the sun, watering a plant, showing soil and air"
+              },
+              {
+                character: "dora",
+                characterName: "Dora the Explorer",
+                text: "¡Excelente! Plants are amazing! They give us oxygen to breathe and food to eat. Let's take care of plants everywhere we go!",
+                background: "Dora surrounded by healthy, happy plants and flowers"
+              }
+            ]
+          }
+        },
+        English: {
+          Reading: {
+            title: "Pokemon Reading Adventure",
+            panels: [
+              {
+                character: "pikachu",
+                characterName: "Pikachu",
+                text: "Pika pika! Reading is one of my favorite activities! Books take me on amazing adventures without leaving home!",
+                background: "Pikachu sitting with a pile of colorful books"
+              },
+              {
+                character: "pikachu",
+                characterName: "Pikachu",
+                text: "When I read, I look at each word carefully. I sound out letters: C-A-T makes 'cat'! Reading gets easier with practice!",
+                background: "Pikachu pointing at words in an open book"
+              },
+              {
+                character: "pikachu",
+                characterName: "Pikachu",
+                text: "Books have stories about brave Pokemon, exciting battles, and faraway places! Every book teaches me something new!",
+                background: "Pikachu imagining scenes from adventure books floating around"
+              },
+              {
+                character: "pikachu",
+                characterName: "Pikachu",
+                text: "The more I read, the smarter I become! Reading helps me learn new words and understand the world better! Pika pika!",
+                background: "Pikachu happily surrounded by books and floating words"
+              }
+            ]
+          }
+        },
+        Social: {
+          Friendship: {
+            title: "SpongeBob's Friendship Lesson",
+            panels: [
+              {
+                character: "spongebob",
+                characterName: "SpongeBob SquarePants",
+                text: "Hi friends! I'm SpongeBob and I love making friends! Good friends make life so much more fun and happy!",
+                background: "SpongeBob with Patrick, Sandy, and Squidward in Bikini Bottom"
+              },
+              {
+                character: "spongebob", 
+                characterName: "SpongeBob SquarePants",
+                text: "Being a good friend means being kind, sharing, and helping others when they need it. I always try to help my friends!",
+                background: "SpongeBob helping Patrick with a problem"
+              },
+              {
+                character: "spongebob",
+                characterName: "SpongeBob SquarePants",
+                text: "Sometimes friends disagree, and that's okay! The important thing is to talk about it and say sorry when we make mistakes.",
+                background: "SpongeBob and Patrick talking things out after a disagreement"
+              },
+              {
+                character: "spongebob",
+                characterName: "SpongeBob SquarePants",
+                text: "Friends care about each other and have fun together! Being a good friend makes you feel happy inside! I'm ready to be your friend!",
+                background: "SpongeBob playing happily with all his friends"
+              }
+            ]
+          }
+        }
       };
 
-      // For now, we'll create educational stories directly
-      // You can provide your Gemini API key later to get AI-generated content
-
-      // Create prompt for Gemini API
-      const prompt = `Create an educational comic story for a ${user.age} year old child in class ${user.class} about ${topic} in ${subject}. 
-      The child's favorite cartoons are: ${user.favoriteCartoons.join(", ")}.
-      
-      Create a story with 4 panels that teaches the concept through fun characters. Each panel should have:
-      - A character name and emoji
-      - Educational dialogue that explains the concept
-      - Make it engaging and age-appropriate
-      
-      Format the response as a JSON object with:
-      {
-        "title": "Story title",
-        "panels": [
+      // Get story from templates or create a default one
+      const storyData = (templateStories as any)[subject]?.[topic] || {
+        title: `Learning About ${topic}`,
+        panels: [
           {
-            "character": "😊",
-            "characterName": "Character Name",
-            "text": "Educational dialogue",
-            "background": "bg-yellow-50"
+            character: "SpongeBob",
+            characterName: "SpongeBob SquarePants",
+            text: `Hi there! Today we're going to learn about ${topic} in ${subject}. This is going to be so much fun!`,
+            background: "A colorful classroom setting"
+          },
+          {
+            character: "SpongeBob", 
+            characterName: "SpongeBob SquarePants",
+            text: `${topic} is really interesting! Let me explain what makes it special and why it's important to learn about.`,
+            background: "Educational setting with books and learning materials"
+          },
+          {
+            character: "SpongeBob",
+            characterName: "SpongeBob SquarePants", 
+            text: `Here's a fun way to remember ${topic}: think of it like a game where you get to explore and discover new things!`,
+            background: "Fun activity scene with colorful elements"
+          },
+          {
+            character: "SpongeBob",
+            characterName: "SpongeBob SquarePants", 
+            text: `Great job learning about ${topic}! You're doing amazing and I'm so proud of you!`,
+            background: "Celebration scene with confetti and cheers"
           }
         ]
-      }`;
+      };
 
-      // Call Gemini API
-      const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }]
-        })
-      });
-
-      if (!geminiResponse.ok) {
-        console.error('Gemini API error:', await geminiResponse.text());
-        return res.status(500).json({ error: "Failed to generate story from Gemini API" });
-      }
-
-      const geminiData = await geminiResponse.json();
-      
-      if (!geminiData.candidates || geminiData.candidates.length === 0) {
-        return res.status(500).json({ error: "No story generated by Gemini API" });
-      }
-
-      const storyText = geminiData.candidates[0].content.parts[0].text;
-      
-      // Try to parse JSON from the response
-      let storyData;
-      try {
-        // Clean the response to extract JSON
-        const jsonMatch = storyText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          storyData = JSON.parse(jsonMatch[0]);
-        } else {
-          throw new Error("No JSON found in response");
-        }
-      } catch (parseError) {
-        // Fallback: create a basic story structure
-        // Educational story library with comprehensive curriculum
-        const educationalStories = {
-          Math: {
-            Addition: {
-              title: "Addition Adventure with SpongeBob",
-              panels: [
-                {
-                  character: "SpongeBob",
-                  characterName: "SpongeBob SquarePants",
-                  text: "Hi! I'm SpongeBob and I love making Krabby Patties! Let's learn addition by counting ingredients!",
-                  background: "Krusty Krab kitchen with colorful ingredients"
-                },
-                {
-                  character: "SpongeBob",
-                  characterName: "SpongeBob SquarePants", 
-                  text: "I have 2 pickles and Patrick brings me 3 more pickles. How many pickles do I have now?",
-                  background: "Kitchen counter showing 2 + 3 pickles"
-                },
-                {
-                  character: "Patrick",
-                  characterName: "Patrick Star",
-                  text: "Let me count! 2 pickles... plus 3 more pickles... that's 5 pickles total!",
-                  background: "Patrick counting 5 pickles lined up"
-                },
-                {
-                  character: "SpongeBob",
-                  characterName: "SpongeBob SquarePants",
-                  text: "Exactly! 2 + 3 = 5! Addition means putting groups together to find the total!",
-                  background: "SpongeBob showing '2 + 3 = 5' equation"
-                }
-              ]
-            },
-            Multiplication: {
-              title: "Multiplication Magic with Pokemon",
-              panels: [
-                {
-                  character: "Pikachu",
-                  characterName: "Pikachu",
-                  text: "Pika pika! Let's learn multiplication by organizing Pokemon cards in groups!",
-                  background: "Room with Pokemon cards in organized groups"
-                },
-                {
-                  character: "Ash",
-                  characterName: "Ash Ketchum",
-                  text: "I have 3 rows of Pokemon cards, and each row has 4 cards. How many cards total?",
-                  background: "Table showing 3 rows of 4 cards each"
-                },
-                {
-                  character: "Pikachu", 
-                  characterName: "Pikachu",
-                  text: "Let's count! Row 1: 4 cards, Row 2: 4 cards, Row 3: 4 cards. That's 4 + 4 + 4!",
-                  background: "Pikachu pointing at each row"
-                },
-                {
-                  character: "Ash",
-                  characterName: "Ash Ketchum",
-                  text: "Great! 3 groups of 4 equals 12 cards total. We write this as 3 × 4 = 12!",
-                  background: "Ash showing equation 3 × 4 = 12"
-                }
-              ]
-            }
-          },
-          Science: {
-            "Water Cycle": {
-              title: "Water Cycle Journey with Dora",
-              panels: [
-                {
-                  character: "Dora",
-                  characterName: "Dora the Explorer",
-                  text: "¡Hola! I'm Dora! Today we're going on an adventure to learn about the water cycle!",
-                  background: "Sunny landscape with rivers and clouds"
-                },
-                {
-                  character: "Boots",
-                  characterName: "Boots the Monkey",
-                  text: "Look Dora! The sun heats the water in the river. The water turns into invisible water vapor!",
-                  background: "River with evaporation arrows going up"
-                },
-                {
-                  character: "Dora",
-                  characterName: "Dora the Explorer", 
-                  text: "That's evaporation! The water vapor rises and forms clouds when it gets cold in the sky!",
-                  background: "Water vapor forming fluffy clouds"
-                },
-                {
-                  character: "Boots",
-                  characterName: "Boots the Monkey",
-                  text: "When clouds get heavy, water falls as rain! The cycle starts again!",
-                  background: "Rain falling back to complete the cycle"
-                }
-              ]
-            },
-            Photosynthesis: {
-              title: "Plant Power with Adventure Time",
-              panels: [
-                {
-                  character: "Finn",
-                  characterName: "Finn the Human",
-                  text: "Adventure time! Jake and I are learning how plants make their own food!",
-                  background: "Colorful forest with various plants"
-                },
-                {
-                  character: "Jake",
-                  characterName: "Jake the Dog",
-                  text: "Plants are like nature's chefs! They use sunlight, water, and air to make glucose!",
-                  background: "Tree with sun rays hitting green leaves"
-                },
-                {
-                  character: "Finn",
-                  characterName: "Finn the Human",
-                  text: "Green chlorophyll in leaves captures sunlight energy. It's like plant solar panels!",
-                  background: "Close-up of leaves with sparkles"
-                },
-                {
-                  character: "Jake",
-                  characterName: "Jake the Dog",
-                  text: "And oxygen comes out as a bonus! Plants feed themselves AND help us breathe!",
-                  background: "Happy tree releasing oxygen bubbles"
-                }
-              ]
-            }
-          },
-          English: {
-            Storytelling: {
-              title: "Story Structure with Frozen",
-              panels: [
-                {
-                  character: "Elsa",
-                  characterName: "Queen Elsa",
-                  text: "Hello! Every great story has three parts: beginning, middle, and end!",
-                  background: "Magical ice castle library"
-                },
-                {
-                  character: "Anna",
-                  characterName: "Princess Anna",
-                  text: "The beginning introduces characters and setting. Like when we first met in Arendelle!",
-                  background: "Arendelle castle with young sisters"
-                },
-                {
-                  character: "Elsa",
-                  characterName: "Queen Elsa",
-                  text: "The middle has the main adventure or problem. Like when I froze everything!",
-                  background: "Dramatic winter scene with ice magic"
-                },
-                {
-                  character: "Anna",
-                  characterName: "Princess Anna",
-                  text: "The end resolves everything! We learned that love can overcome any challenge!",
-                  background: "Happy ending with sisters hugging"
-                }
-              ]
-            }
-          },
-          Social: {
-            Community: {
-              title: "Community Helpers with Paw Patrol",
-              panels: [
-                {
-                  character: "Ryder",
-                  characterName: "Ryder",
-                  text: "PAW Patrol is ready! Let's learn about important jobs people do in our community!",
-                  background: "Adventure Bay with community buildings"
-                },
-                {
-                  character: "Marshall",
-                  characterName: "Marshall",
-                  text: "I'm a firefighter pup! Firefighters keep people safe and put out fires!",
-                  background: "Fire station with Marshall's fire truck"
-                },
-                {
-                  character: "Chase",
-                  characterName: "Chase",
-                  text: "I'm a police pup! Police officers help keep our community safe!",
-                  background: "Police station with Chase's police car"
-                },
-                {
-                  character: "Ryder",
-                  characterName: "Ryder",
-                  text: "Every job is important! Teachers, doctors, farmers all help make our community great!",
-                  background: "Community scene with various helpers"
-                }
-              ]
-            }
-          }
-        };
-
-        storyData = educationalStories[subject]?.[topic] || {
-          title: `Learning ${topic} Adventure`,
-          panels: [
-            {
-              character: user.favoriteCartoons[0] || "SpongeBob",
-              characterName: user.favoriteCartoons[0] || "SpongeBob SquarePants",
-              text: `Hi! Let's explore ${topic} together! This is going to be so much fun!`,
-              background: "Colorful classroom with educational materials"
-            },
-            {
-              character: user.favoriteCartoons[0] || "SpongeBob", 
-              characterName: user.favoriteCartoons[0] || "SpongeBob SquarePants",
-              text: `${topic} is really amazing! There's so much to discover and learn!`,
-              background: "Adventure scene exploring the topic"
-            },
-            {
-              character: user.favoriteCartoons[0] || "SpongeBob",
-              characterName: user.favoriteCartoons[0] || "SpongeBob SquarePants", 
-              text: `Great job learning about ${topic}! You're doing amazing and I'm so proud of you!`,
-              background: "Celebration scene with confetti and cheers"
-            }
-          ]
-        };
-      }
-
-      // Return the generated story directly for demo
+      // Return the generated story
       const storyResponse = {
         id: Math.floor(Math.random() * 1000),
         userId,
@@ -398,207 +302,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-      // Update user progress
-      const progress = await storage.getUserProgress(userId);
-      if (progress) {
-        const currentSubjectProgress = progress.subjectProgress[subject] || {
-          storiesCompleted: 0,
-          topicsLearned: [],
-          timeSpent: 0
-        };
-
-        const updatedSubjectProgress = {
-          ...progress.subjectProgress,
-          [subject]: {
-            ...currentSubjectProgress,
-            storiesCompleted: currentSubjectProgress.storiesCompleted + 1,
-            topicsLearned: [...new Set([...currentSubjectProgress.topicsLearned, topic])],
-            timeSpent: currentSubjectProgress.timeSpent + 5 // Assume 5 minutes per story
-          }
-        };
-
-        await storage.updateUserProgress(userId, {
-          totalStoriesRead: progress.totalStoriesRead + 1,
-          totalTimeSpent: progress.totalTimeSpent + 5,
-          subjectProgress: updatedSubjectProgress,
-          lastActiveDate: new Date()
-        });
-
-        // Check for achievements
-        const totalStories = progress.totalStoriesRead + 1;
-        const userAchievements = await storage.getAchievementsByUser(userId);
-        const achievementTypes = userAchievements.map(a => a.type);
-
-        // First story achievement
-        if (totalStories === 1 && !achievementTypes.includes('first_story')) {
-          await storage.createAchievement({
-            userId,
-            type: 'first_story',
-            name: 'First Adventure',
-            description: 'Completed your very first story!',
-            icon: '🎯'
-          });
-        }
-
-        // Subject master achievements
-        const subjectStoriesCount = updatedSubjectProgress[subject].storiesCompleted;
-        if (subjectStoriesCount >= 5 && !achievementTypes.includes(`${subject.toLowerCase()}_master`)) {
-          await storage.createAchievement({
-            userId,
-            type: `${subject.toLowerCase()}_master`,
-            name: `${subject} Master`,
-            description: `Completed 5 stories in ${subject}!`,
-            icon: subject === 'Math' ? '🧮' : subject === 'Science' ? '🔬' : '📖'
-          });
-        }
-      }
-
-      res.json(savedStory);
-    } catch (error) {
-      console.error('Story generation error:', error);
-      res.status(500).json({ error: "Failed to generate story" });
-    }
-  });
-
-  // Story routes
-  app.get("/api/stories/user", async (req, res) => {
+  // Get current user's textbooks
+  app.get("/api/textbooks/user", async (req, res) => {
     try {
-      // For demo mode, return sample stories or empty array
-      const stories = [];
-      res.json(stories);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch stories" });
-    }
-  });
-
-  app.get("/api/stories/user/:userId", async (req, res) => {
-    try {
-      const stories = await storage.getStoriesByUser(parseInt(req.params.userId));
-      res.json(stories);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch stories" });
-    }
-  });
-
-  app.get("/api/stories/user/:userId/subject/:subject", async (req, res) => {
-    try {
-      const stories = await storage.getStoriesBySubject(
-        parseInt(req.params.userId),
-        req.params.subject
-      );
-      res.json(stories);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch stories" });
-    }
-  });
-
-  app.get("/api/stories/:id", async (req, res) => {
-    try {
-      const story = await storage.getStory(parseInt(req.params.id));
-      if (!story) {
-        return res.status(404).json({ error: "Story not found" });
-      }
-      res.json(story);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch story" });
-    }
-  });
-
-  app.put("/api/stories/:id", async (req, res) => {
-    try {
-      const storyId = parseInt(req.params.id);
-      const updates = insertStorySchema.partial().parse(req.body);
-      const story = await storage.updateStory(storyId, updates);
-      res.json(story);
-    } catch (error) {
-      res.status(400).json({ error: error instanceof Error ? error.message : "Invalid update data" });
-    }
-  });
-
-  // Textbook routes
-  app.get("/api/textbooks/user/:userId", async (req, res) => {
-    try {
-      const textbooks = await storage.getTextbooksByUser(parseInt(req.params.userId));
+      const userId = 1; // Demo user ID
+      const textbooks = await storage.getTextbooksByUser(userId);
       res.json(textbooks);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch textbooks" });
+      res.status(500).json({ error: "Failed to get textbooks" });
     }
   });
 
+  // Create new textbook
   app.post("/api/textbooks", async (req, res) => {
     try {
       const textbookData = insertTextbookSchema.parse(req.body);
       const textbook = await storage.createTextbook(textbookData);
       res.json(textbook);
     } catch (error) {
-      res.status(400).json({ error: error instanceof Error ? error.message : "Invalid textbook data" });
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid textbook data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create textbook" });
     }
   });
 
-  app.post("/api/textbooks/:id/stories/:storyId", async (req, res) => {
+  // Get current user's achievements
+  app.get("/api/achievements/user", async (req, res) => {
     try {
-      const textbookId = parseInt(req.params.id);
-      const storyId = parseInt(req.params.storyId);
-      const textbook = await storage.addStoryToTextbook(textbookId, storyId);
-      res.json(textbook);
-    } catch (error) {
-      res.status(400).json({ error: "Failed to add story to textbook" });
-    }
-  });
-
-  // Achievement routes
-  app.get("/api/achievements/user/:userId", async (req, res) => {
-    try {
-      const achievements = await storage.getAchievementsByUser(parseInt(req.params.userId));
+      const userId = 1; // Demo user ID
+      const achievements = await storage.getAchievementsByUser(userId);
       res.json(achievements);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch achievements" });
+      res.status(500).json({ error: "Failed to get achievements" });
     }
   });
 
-  // Progress routes
-  app.get("/api/progress/user/:userId", async (req, res) => {
+  // Create new achievement
+  app.post("/api/achievements", async (req, res) => {
     try {
-      const progress = await storage.getUserProgress(parseInt(req.params.userId));
-      if (!progress) {
-        return res.status(404).json({ error: "Progress not found" });
+      const achievementData = insertAchievementSchema.parse(req.body);
+      const achievement = await storage.createAchievement(achievementData);
+      res.json(achievement);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid achievement data", details: error.errors });
       }
+      res.status(500).json({ error: "Failed to create achievement" });
+    }
+  });
+
+  // Get current user's progress
+  app.get("/api/progress/user", async (req, res) => {
+    try {
+      const userId = 1; // Demo user ID
+      const progress = await storage.getUserProgress(userId);
       res.json(progress);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch progress" });
+      res.status(500).json({ error: "Failed to get progress" });
     }
   });
 
-  // Chatbot route (simple responses for now)
-  app.post("/api/chatbot", async (req, res) => {
+  // Update user progress
+  app.post("/api/progress", async (req, res) => {
     try {
-      const { message, context } = req.body;
-      
-      // Simple rule-based responses for educational questions
-      const responses = {
-        fraction: "Great question about fractions! Think of fractions like sharing pizza. If you cut a pizza into 4 equal pieces and take 1 piece, you have 1/4 of the pizza! 🍕",
-        math: "Math is all around us! It helps us count, measure, and solve problems. What specific math topic would you like to learn about?",
-        science: "Science helps us understand how the world works! From why the sky is blue to how plants grow. What interests you most?",
-        default: "That's a wonderful question! I'm here to help you learn. Can you tell me more about what you're trying to understand?"
-      };
-
-      let response = responses.default;
-      const lowerMessage = message.toLowerCase();
-
-      if (lowerMessage.includes('fraction')) {
-        response = responses.fraction;
-      } else if (lowerMessage.includes('math') || lowerMessage.includes('number')) {
-        response = responses.math;
-      } else if (lowerMessage.includes('science')) {
-        response = responses.science;
-      }
-
-      res.json({ response });
+      const progressData = insertUserProgressSchema.parse(req.body);
+      const progress = await storage.createUserProgress(progressData);
+      res.json(progress);
     } catch (error) {
-      res.status(500).json({ error: "Failed to process question" });
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid progress data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update progress" });
     }
   });
 
-  const httpServer = createServer(app);
+  const httpServer = app.listen(5000, "0.0.0.0", () => {
+    console.log("Server running on http://0.0.0.0:5000");
+  });
+
   return httpServer;
 }
