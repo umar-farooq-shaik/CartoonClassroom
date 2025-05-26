@@ -33,4 +33,4 @@
 - **Backend:** Node.js, Express.js
 - **Database:** MongoDB
 - **AI Integration:** Google Gemini API (for free story generation)
-- 
+ 
