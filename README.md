@@ -1,11 +1,12 @@
 # 🎓 CartoonClassroom
 
-**CartoonClassroom** is a colorful, comic-based educational platform where students learn through fun stories explained by their favorite cartoon characters.
-
+**CartoonClassroom** turns any topic or real-world scenario into a colorful comic story using cartoon characters familiar to a child’s age, region, and preferences. Characters become part of the story — not teachers — and explain concepts through action-packed plots.
 
 <img src="https://drive.google.com/uc?export=view&id=1jw0Ca6mPwy57wnm8ysAqpo9HG00GXw28" alt="Banner" width="100%" />
 
 👉 [Watch the Full Demo on YouTube](https://youtu.be/1iNsBNybNOY)
+
+
 ## 🚀 Features
 
 - 📚 Explain Like I'm 5 comic-style learning
