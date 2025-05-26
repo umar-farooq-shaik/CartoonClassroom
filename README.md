@@ -19,15 +19,7 @@
 - 🔁 Refresh stories & bookmark favorites
 - 📊 Learning analytics for motivation
 - 🌐 Real-world tie-ins and story-based learning
-
-## 🛠️ Tech Stack
-
-- **Frontend:** React.js, Tailwind CSS
-- **Backend:** Node.js, Express.js
-- **Database:** MongoDB
-- **AI Integration:** Google Gemini API (for free story generation)
-- **Other:** Free-to-use APIs only, no image or voice generation
-
+  
 ## 🧑‍🏫 How It Works
 
 1. ✍️ Sign up and select your age, location, and favorite cartoon characters.
@@ -35,3 +27,10 @@
 3. 📖 Get a comic-style story that explains it using familiar characters and catchphrases.
 4. 🤖 Ask follow-up questions via chatbot.
 5. 🏅 Earn badges, build your own comic books, and share stories with friends!
+## 🛠️ Tech Stack
+
+- **Frontend:** React.js, Tailwind CSS
+- **Backend:** Node.js, Express.js
+- **Database:** MongoDB
+- **AI Integration:** Google Gemini API (for free story generation)
+- 
